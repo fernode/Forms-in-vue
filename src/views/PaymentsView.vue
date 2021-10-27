@@ -1,174 +1,56 @@
 <template>
   <div>
     <h3>Payment</h3>
-    <Error :error="error"/>
+    <Error :error="error" />
     <form novalidate @submit.prevent="onSave">
       <div class="row">
         <div class="col-md-6">
-          <div><strong>Shipping information</strong></div>
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="name"
-              placeholder="Your name"
-              v-model="payment.shipping.fullName"
-            />
-          </div>
-          <div class="form-group">
-            <label for="company">Company name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="company"
-              placeholder="Your company"
-              v-model="payment.shipping.company"
-            />
-          </div>
-          <div class="form-group">
-            <label for="address1">Address</label>
-            <input
-              type="text"
-              class="form-control"
-              id="address1"
-              placeholder="Address"
-              v-model="payment.shipping.address1"
-            />
-          </div>
-          <div class="form-group">
-            <label for="address2">Suite/apartment</label>
-            <input
-              type="text"
-              class="form-control"
-              id="address2"
-              placeholder="Suite/apartment"
-              v-model="payment.shipping.address2"
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="city">City</label>
+          <AddressView :address="payment.shipping">
+            <div><strong>Shipping information</strong></div>
+            <div class="form-group">
+              <label for="name">Name</label>
               <input
                 type="text"
                 class="form-control"
-                id="city"
-                placeholder="eg New York"
-                v-model="payment.shipping.city"
-              />
-            </div>
-            <div class="form-group col-md-4">
-              <label for="stateProvince">State</label>
-              <select
-                id="stateProvince"
-                class="form-control"
-                v-model="payment.shipping.state"
-              >
-                <option
-                  v-for="s in states"
-                  :key="s.abbreviation"
-                  :value="s.abbreviation"
-                >
-                  {{ stateFormat(s) }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group col-md-2">
-              <label for="zip">Zip</label>
-              <input
-                type="text"
-                class="form-control"
-                id="zip"
-                placeholder="Zip"
-                v-model="zipCode"
+                id="name"
+                placeholder="Your name"
+                v-model="payment.shipping.fullName"
               />
             </div>
             <div class="form-group">
-              <input type="submit" value="Next" class="btn btn-success" />
+              <label for="company">Company name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="company"
+                placeholder="Your company"
+                v-model="payment.shipping.company"
+              />
             </div>
-          </div>
+          </AddressView>
         </div>
 
         <div class="col-md-6">
           <div><strong>Billing information</strong></div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              value=""
-              id="sameAsShipping"
-              v-model="payment.billing.sameAsShipping"
-            />
-            <label class="form-check-label" for="sameAsShipping">
-              Same as shipping
-            </label>
-          </div>
 
-          <div class="form-group">
-            <label for="address1">Address</label>
-            <input
-              type="text"
-              class="form-control"
-              id="address1"
-              placeholder="Address"
-              v-model="payment.billing.address1"
-              :disabled="payment.billing.sameAsShipping"
-            />
-          </div>
-          <div class="form-group">
-            <label for="address2">Suite/apartment</label>
-            <input
-              type="text"
-              class="form-control"
-              id="address2"
-              placeholder="Suite/apartment"
-              v-model="payment.billing.address2"
-              :disabled="payment.billing.sameAsShipping"
-            />
-          </div>
+          <AddressView
+            :address="payment.billing"
+            :isDisabled="payment.billing.sameAsShipping"
+          >
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value=""
+                id="sameAsShipping"
+                v-model="payment.billing.sameAsShipping"
+              />
+              <label class="form-check-label" for="sameAsShipping">
+                Same as shipping
+              </label>
+            </div>
+          </AddressView>
 
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label for="city">City</label>
-              <input
-                type="text"
-                class="form-control"
-                id="city"
-                placeholder="eg New York"
-                v-model="payment.billing.city"
-                :disabled="payment.billing.sameAsShipping"
-              />
-            </div>
-            <div class="form-group col-md-4">
-              <label for="stateProvince">State</label>
-              <select
-                id="stateProvince"
-                class="form-control"
-                v-model="payment.billing.state"
-                :disabled="payment.billing.sameAsShipping"
-              >
-                <option
-                  v-for="s in states"
-                  :key="s.abbreviation"
-                  :value="s.abbreviation"
-                >
-                  {{ stateFormat(s) }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group col-md-2">
-              <label for="zip">Zip</label>
-              <input
-                type="text"
-                class="form-control"
-                id="zip"
-                placeholder="Zip"
-                v-model="zipCode"
-                :disabled="payment.billing.sameAsShipping"
-              />
-            </div>
-          </div>
           <div><strong>Credit card</strong></div>
           <div class="form-group">
             <label for="ccnumber">Credit Card Number</label>
@@ -232,6 +114,10 @@
               </div>
             </div>
           </div>
+
+          <div class="form-group">
+            <input type="submit" value="Next" class="btn btn-success" />
+          </div>
         </div>
       </div>
     </form>
@@ -249,10 +135,11 @@ import { ref, computed, watch } from "vue";
 import states from "@/lookup/states";
 import months from "@/lookup/months";
 import formatters from "@/formatters";
-import Error from '@/components/Error.vue';
+import Error from "@/components/Error.vue";
+import AddressView from "./AddressView";
 
 export default {
-  components: { Error },
+  components: { Error, AddressView },
   setup() {
     const payment = ref({
       shipping: {},
