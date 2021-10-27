@@ -1,6 +1,6 @@
 <template>
   <div class="border rounded p-2">
-    <slot/>
+    <slot />
     <div class="form-group">
       <label for="address1">Address</label>
       <input
@@ -68,10 +68,9 @@
   </div>
 </template>
 
-
 <script>
-import state from "@/lookup/states";
-import formatters from "@/formatters";
+import state from '@/lookup/states'
+import formatters from '@/formatters'
 
 export default {
   props: {
@@ -87,7 +86,7 @@ export default {
     return {
       states: state,
       ...formatters,
-    };
+    }
   },
-};
+}
 </script>
