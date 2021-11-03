@@ -1,6 +1,9 @@
-import { ref } from "vue";
-import AddressModel from "./AddressModel";
+import AddressModel from './AddressModel'
 
-export default class BillingAddressModel extends AddressModel{
-  sameAsShipping = ref(false)
+export default class BillingAddressModel extends AddressModel {
+  sameAsShipping = false
+
+  get rules() {
+    return Object.assign({ sameAsShipping: {} }, super.rules)
+  }
 }

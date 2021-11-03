@@ -4,127 +4,121 @@
     <form novalidate @submit.prevent="onSave">
       <div class="row">
         <div class="col-md-6">
-          <AddressView :address="payment.shipping">
-            <div><strong>Shipping information</strong></div>
+          <div><strong>Shipping Information</strong></div>
+          <AddressView :address="model.shipping">
             <div class="form-group">
               <label for="name">Name</label>
               <input
+                id="name"
                 type="text"
                 class="form-control"
-                id="name"
-                placeholder="Your name"
-                v-model="payment.shipping.fullName"
+                placeholder="Your Name"
+                v-model="model.shipping.fullName.$model"
               />
             </div>
             <div class="form-group">
-              <label for="company">Company name</label>
+              <label for="company">Company Name</label>
               <input
+                id="company"
                 type="text"
                 class="form-control"
-                id="company"
-                placeholder="Your company"
-                v-model="payment.shipping.company"
+                placeholder="Company"
+                v-model="model.shipping.company.$model"
               />
             </div>
           </AddressView>
+          <div class="form-group">
+            <input
+              type="submit"
+              value="Next"
+              class="btn btn-success"
+              :disabled="model.$invalid"
+            />
+          </div>
         </div>
-
         <div class="col-md-6">
-          <div><strong>Billing information</strong></div>
-
+          <div><strong>Billing Information</strong></div>
           <AddressView
-            :address="payment.billing"
-            :isDisabled="payment.billing.sameAsShipping"
+            :address="model.billing"
+            :isDisabled="model.billing.sameAsShipping.$model"
           >
             <div class="form-check">
               <input
-                class="form-check-input"
                 type="checkbox"
-                value=""
                 id="sameAsShipping"
-                v-model="payment.billing.sameAsShipping"
+                class="form-check-input"
+                v-model="model.billing.sameAsShipping.$model"
               />
-              <label class="form-check-label" for="sameAsShipping">
-                Same as shipping
-              </label>
+              <label for="sameAsShipping" class="form-check-label"
+                >Same As Shipping?</label
+              >
             </div>
           </AddressView>
-
-          <div><strong>Credit card</strong></div>
+          <div><strong>Credit Card</strong></div>
           <div class="form-group">
-            <label for="ccnumber">Credit Card Number</label>
-            <div class="input-group">
-              <input
-                class="form-control"
-                type="text"
-                placeholder="0000 0000 0000 0000"
-                v-model="payment.creditCard.number"
-              />
-            </div>
+            <label for="ccNumber">Credit Card Number</label>
+            <input
+              class="form-control"
+              type="text"
+              v-model="model.creditcard.number.$model"
+              id="ccNumber"
+            />
+            <ValidationMessage :model="model.creditcard.number" />
           </div>
           <div class="form-group">
             <label for="nameOnCard">Name on Card</label>
-            <div class="input-group">
-              <input
-                class="form-control"
-                id="nameOnCard"
-                type="text"
-                placeholder="Name on the card"
-                v-model="payment.creditCard.nameOnCard"
-              />
-            </div>
+            <input
+              class="form-control"
+              type="text"
+              v-model="model.creditcard.nameOnCard.$model"
+              id="nameOnCard"
+            />
+            <ValidationMessage :model="model.creditcard.nameOnCard" />
           </div>
-
-          <div class="row">
+          <div class="form-row">
             <div class="form-group col-md-4">
-              <label for="expirationDate">Expiration Date</label>
+              <label for="expirationMonth">Expiration Month</label>
               <select
+                v-model="model.creditcard.expirationMonth.$model"
                 class="form-control"
-                id="expirationDate"
-                v-model="payment.creditCard.expirationDate"
               >
-                <option v-for="m in months" :key="m.name" :value="m.number">
+                <option v-for="m in months" :key="m.number" :value="m.number">
                   {{ m.name }}
                 </option>
               </select>
+              <ValidationMessage :model="model.creditcard.expirationMonth" />
             </div>
             <div class="form-group col-md-4">
-              <label for="expirationDate">Expiration Year</label>
+              <label for="expirationYear">Expiration Year</label>
               <select
+                v-model="model.creditcard.expirationYear.$model"
                 class="form-control"
-                id="expirationYear"
-                v-model="payment.creditCard.expirationYear"
               >
-                <option v-for="y in years" :key="y" :value="y">
-                  {{ y }}
-                </option>
+                <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
               </select>
+              <ValidationMessage :model="model.creditcard.expirationYear" />
             </div>
             <div class="form-group col-md-4">
-              <label for="cvv">CVV</label>
-              <div class="input-group">
-                <input
-                  class="form-control"
-                  id="cvv"
-                  type="text"
-                  placeholder="CVV"
-                  v-model="payment.creditCard.cvv"
-                />
-              </div>
+              <label for="cvv">CVV Code</label>
+              <input
+                v-model="model.creditcard.cvv.$model"
+                class="form-control"
+                id="cvv"
+              />
+              <ValidationMessage :model="model.creditcard.cvv" />
             </div>
           </div>
-
-          <div class="form-group">
-            <input type="submit" value="Next" class="btn btn-success" />
-          </div>
+          <!-- <div class="text-danger" v-if="model.creditcard.$invalid">
+            <ul>
+              <li v-for="e in model.creditcard.$errors" :key="e">{{ `${e.$property}: ${e.$message}` }}</li>
+            </ul>
+          </div> -->
         </div>
       </div>
     </form>
-
-    <div class="col-md-6">
-      <pre>
-        {{ payment }}
-      </pre>
+    <div>
+      <pre>{{ payment }}</pre>
+      <pre>{{ model }}</pre>
     </div>
   </div>
 </template>
@@ -132,56 +126,59 @@
 <script>
 import { computed, watch, reactive } from 'vue'
 import states from '@/lookup/states'
-import months from '@/lookup/months'
 import formatters from '@/formatters'
+import months from '@/lookup/months'
 import AddressView from './AddressView'
 import state from '@/state'
+import ValidationMessage from '../components/ValidationMessage.vue'
 
 export default {
-  components: { AddressView },
+  components: {
+    AddressView,
+    ValidationMessage,
+  },
   emits: ['onError'],
   setup() {
     const payment = reactive(state)
 
-    function onSave() {
-      state.errorMessage.value ="We can't save yet, we have a error with a api"
+    async function onSave() {
+      if (await model.value.$validate()) {
+        state.errorMessage.value = "We can't save yet, we don't have an API"
+      }
     }
 
-    const zipCode = computed({
+    const zipcode = computed({
       get: () => payment.postalCode,
       set: val => {
         if (val && typeof val === 'string') {
           if (val.length <= 5 || val.indexOf('-') > -1) {
             payment.postalCode = val
           } else {
-            payment.postalCode = `${val.substring(0, 5)}-${val.substring(
-              5
-            )}`
+            payment.postalCode = `${val.substring(0, 5)}-${val.substring(5)}`
           }
         }
       },
     })
 
-    watch(
-      () => payment.billing.sameAsShipping.value,
-      val => {
-        if (val === true) {
-          payment.clear()
+    watch([payment.billing, payment.shipping], () => {
+      if (payment.billing) {
+        if (payment.billing.sameAsShipping) {
+          payment.billing.setFrom(payment.shipping)
         }
       }
-    )
+    })
 
-    const years = Array.from(
-      { length: 10 },
-      (_, i) => new Date().getFullYear() + i
-    )
+    const years = Array.from({ length: 10 }, (_, i) => i + 2020)
+
+    const model = state.toModel()
 
     return {
       payment,
+      model,
       states,
       onSave,
       ...formatters,
-      zipCode,
+      zipcode,
       months,
       years,
     }
