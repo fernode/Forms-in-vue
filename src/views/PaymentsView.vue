@@ -130,36 +130,31 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { computed, watch, reactive } from 'vue'
 import states from '@/lookup/states'
 import months from '@/lookup/months'
 import formatters from '@/formatters'
 import AddressView from './AddressView'
+import state from '@/state'
 
 export default {
   components: { AddressView },
   emits: ['onError'],
-  setup(props, { emit }) {
-    const payment = ref({
-      shipping: {},
-      billing: {
-        sameAsShipping: false,
-      },
-      creditCard: {},
-    })
+  setup() {
+    const payment = reactive(state)
 
     function onSave() {
-      emit("onError", "We can't save yet, we have a error with a api")
+      state.errorMessage.value ="We can't save yet, we have a error with a api"
     }
 
     const zipCode = computed({
-      get: () => payment.value.postalCode,
+      get: () => payment.postalCode,
       set: val => {
         if (val && typeof val === 'string') {
           if (val.length <= 5 || val.indexOf('-') > -1) {
-            payment.value.postalCode = val
+            payment.postalCode = val
           } else {
-            payment.value.postalCode = `${val.substring(0, 5)}-${val.substring(
+            payment.postalCode = `${val.substring(0, 5)}-${val.substring(
               5
             )}`
           }
@@ -168,14 +163,10 @@ export default {
     })
 
     watch(
-      () => payment.value.billing.sameAsShipping,
+      () => payment.billing.sameAsShipping.value,
       val => {
         if (val === true) {
-          payment.value.billing.address1 = ''
-          payment.value.billing.address2 = ''
-          payment.value.billing.state = ''
-          payment.value.billing.zipCode = ''
-          payment.value.billing.city = ''
+          payment.clear()
         }
       }
     )
